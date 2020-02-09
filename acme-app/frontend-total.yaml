@@ -3,30 +3,28 @@ kind: Service
 metadata:
   name: frontend
   labels:
-    app: acmefit-frontend-total
+    app: acmefit
     service: frontend
 spec:
   ports:
     - name: http-frontend
       protocol: TCP
       port: 3000
-#      nodePort: 30430
   selector:
-    app: acmefit-frontend-total
+    app: acmefit
     service: frontend
-  type: NodePort
 ---
 apiVersion: apps/v1 # for versions before 1.8.0 use apps/v1beta1
 kind: Deployment
 metadata:
   name: frontend
   labels:
-    app: acmefit-frontend-total
+    app: acmefit
     service: frontend
 spec:
   selector:
     matchLabels:
-      app: acmefit-frontend-total
+      app: acmefit
       service: frontend
   strategy:
     type: Recreate
@@ -34,11 +32,11 @@ spec:
   template:
     metadata:
       labels:
-        app: acmefit-frontend-total
+        app: acmefit
         service: frontend
     spec:
       containers:
-      - image: gcr.io/vmwarecloudadvocacy/acmeshop-front-end:1.0.0
+      - image: gcr.io/vmwarecloudadvocacy/acmeshop-front-end:latest
         name: frontend
         env:
         - name: FRONTEND_PORT
@@ -52,13 +50,17 @@ spec:
         - name: CART_HOST
           value: 'cart'
         - name: USERS_PORT
-          value: '8081'
+          value: '8083'
         - name: CATALOG_PORT
           value: '8082'
         - name: CART_PORT
           value: '5000'
         - name: ORDER_PORT
           value: '6000'
+        - name: JAEGER_AGENT_HOST
+          value: 'localhost'
+        - name: JAEGER_AGENT_PORT
+          value: '6832'
         ports:
         - containerPort: 3000
-          name: http-frontend
+          name: frontend

@@ -1,0 +1,31 @@
+kubectl --namespace istio-system patch pod istio-telemetry-97764b68c-zfz5c -p '{"spec":{"resources":[{"requests":[{"cpu":"101m"}]}]}}'
+
+
+{
+    "spec": {
+	"containers": [
+            {
+                "image": "docker.io/vmwareallspark/mixer:release-1.1-2019-06-16-21-40-afb612225",
+                "name": "mixer",
+                "resources": {
+                    "limits": {
+                        "cpu": "4800m",
+                        "memory": "4G"
+                    },
+                    "requests": {
+                        "cpu": "1",
+                        "memory": "1G"
+                    }
+                } 
+            {
+        ],
+    }
+}
+
+kubectl --namespace istio-system patch pod istio-telemetry-97764b68c-zfz5c --type='json' -p='[{"op": "replace", "path": "/spec/containers/0/resources/requests/cpu", "value":"13m"}]'
+kubectl patch deployment myapp-deployment -p '{"spec":{"template":{"spec":{"containers":[{"name":"myapp","image":"172.20.34.206:5000/myapp:img:3.0"}]}}}}'
+kubectl --namespace istio-system
+kubectl patch deployment myapp-deployment -p '{"spec":{"template":{"spec":{"containers":[{"name":"myapp","image":"172.20.34.206:5000/myapp:img:3.0"}]}}}}'
+
+kubectl patch deployment myapp-deployment -p '{"spec":{"template":{"spec":{"containers":[{"name":"myapp","image":"172.20.34.206:5000/myapp:img:3.0"}]}}}}'
+{.items[0].status.addresses[?(@.type=="InternalIP")].address}'

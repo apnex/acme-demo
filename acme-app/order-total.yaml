@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: order
   labels:
-    app: acmefit-order-total
+    app: acmefit
     service: order
 spec:
   ports:
@@ -11,7 +11,7 @@ spec:
       protocol: TCP
       port: 6000
   selector:
-    app: acmefit-order-total
+    app: acmefit
     service: order
 ---
 apiVersion: apps/v1 # for versions before 1.8.0 use apps/v1beta1
@@ -19,12 +19,12 @@ kind: Deployment
 metadata:
   name: order
   labels:
-    app: acmefit-order-total
+    app: acmefit
     service: order
 spec:
   selector:
     matchLabels:
-      app: acmefit-order-total
+      app: acmefit
       service: order
   strategy:
     type: Recreate
@@ -32,27 +32,37 @@ spec:
   template:
     metadata:
       labels:
-        app: acmefit-order-total
+        app: acmefit
         service: order
     spec:
       volumes:
       - name: acmefit-order-data
         emptyDir: {}
       containers:
-      - image: gcr.io/vmwarecloudadvocacy/acmeshop-order:1.0.1
+      - image: gcr.io/vmwarecloudadvocacy/acmeshop-order:latest
+        # orderpostgres:latest
         name: order
         env:
         - name: ORDER_DB_HOST
-          value: 'order-mongo'
+          value: order-postgres
         - name: ORDER_DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: order-mongo-pass
+              name: order-postgres-pass
               key: password
         - name: ORDER_DB_PORT
-          value: '27017'
+          value: '5432'
+        - name: AUTH_MODE
+          value: "1"
         - name: ORDER_DB_USERNAME
-          value: 'mongoadmin'
+          value: pgbench
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: order-postgres-pass
+              key: password
+        - name: ORDER_AUTH_DB
+          value: postgres
         - name: ORDER_PORT
           value: '6000'
         - name: PAYMENT_PORT
@@ -61,7 +71,7 @@ spec:
           value: 'payment'
         ports:
         - containerPort: 6000
-          name: http-order
+          name: order
         volumeMounts:
         - mountPath: "/data"
           name: "acmefit-order-data"

@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: payment
   labels:
-    app: acmefit-payment-total
+    app: acmefit
     service: payment
 spec:
   ports:
@@ -11,7 +11,7 @@ spec:
       protocol: TCP
       port: 9000
   selector:
-    app: acmefit-payment-total
+    app: acmefit
     service: payment
 ---
 apiVersion: apps/v1
@@ -19,12 +19,12 @@ kind: Deployment
 metadata:
   name: payment
   labels:
-    app: acmefit-payment-total
+    app: acmefit
     service: payment
 spec:
   selector:
     matchLabels:
-      app: acmefit-payment-total
+      app: acmefit
       service: payment
   strategy:
     type: Recreate
@@ -32,15 +32,23 @@ spec:
   template:
     metadata:
       labels:
-        app: acmefit-payment-total
+        app: acmefit
         service: payment
     spec:
       containers:
-      - image: gcr.io/vmwarecloudadvocacy/acmeshop-payment:1.0.0
+      - image: gcr.io/vmwarecloudadvocacy/acmeshop-payment:latest
         name: payment
         env:
         - name: PAYMENT_PORT
           value: '9000'
+        - name: USERS_HOST
+          value: 'users'
+        - name: USERS_PORT
+          value: '8083'
+        - name: JAEGER_AGENT_HOST
+          value: 'localhost'
+        - name: JAEGER_AGENT_PORT
+          value: '6832'
         ports:
         - containerPort: 9000
-          name: http-payment
+          name: payment

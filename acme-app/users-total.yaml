@@ -3,15 +3,15 @@ kind: Service
 metadata:
   name: users
   labels:
-    app: acmefit-users-total
+    app: acmefit
     service: users
 spec:
   ports:
     - name: http-users
       protocol: TCP
-      port: 8081
+      port: 8083
   selector:
-    app: acmefit-users-total
+    app: acmefit
     service: users
 ---
 apiVersion: apps/v1
@@ -19,12 +19,12 @@ kind: Deployment
 metadata:
   name: users
   labels:
-    app: acmefit-users-total
+    app: acmefit
     service: users
 spec:
   selector:
     matchLabels:
-      app: acmefit-users-total
+      app: acmefit
       service: users
   strategy:
     type: Recreate
@@ -32,14 +32,15 @@ spec:
   template:
     metadata:
       labels:
-        app: acmefit-users-total
+        app: acmefit
         service: users
     spec:
       volumes:
       - name: acmefit-users-data
         emptyDir: {}
       containers:
-      - image: gcr.io/vmwarecloudadvocacy/acmeshop-user:1.0.0
+      - image: gcr.io/vmwarecloudadvocacy/acmeshop-user:latest
+        imagePullPolicy: "Always"
         name: users
         env:
         - name: USERS_DB_HOST
@@ -54,10 +55,23 @@ spec:
         - name: USERS_DB_USERNAME
           value: 'mongoadmin'
         - name: USERS_PORT
-          value: '8081'
+          value: '8083'
+        - name: REDIS_HOST
+          value: 'users-redis'
+        - name: REDIS_PORT
+          value: '6379'
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: users-redis-pass
+              key: password
+        - name: JAEGER_AGENT_HOST
+          value: 'localhost'
+        - name: JAEGER_AGENT_PORT
+          value: '6831'
         ports:
-        - containerPort: 8081
-          name: http-users
+        - containerPort: 8083
+          name: users
         volumeMounts:
         - mountPath: "/data"
           name: "acmefit-users-data"

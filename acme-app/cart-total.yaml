@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: cart
   labels:
-    app: acmefit-cart-total
+    app: acmefit
     service: cart
 spec:
   ports:
@@ -11,7 +11,7 @@ spec:
       protocol: TCP
       port: 5000
   selector:
-    app: acmefit-cart-total
+    app: acmefit
     service: cart
 ---
 apiVersion: apps/v1
@@ -19,12 +19,12 @@ kind: Deployment
 metadata:
   name: cart
   labels:
-    app: acmefit-cart-total
+    app: acmefit
     service: cart
 spec:
   selector:
     matchLabels:
-      app: acmefit-cart-total
+      app: acmefit
       service: cart
   strategy:
     type: Recreate
@@ -32,30 +32,41 @@ spec:
   template:
     metadata:
       labels:
-        app: acmefit-cart-total
+        app: acmefit
         service: cart
     spec:
       volumes:
       - name: acmefit-cart-data
         emptyDir: {}
       containers:
-      - image: gcr.io/vmwarecloudadvocacy/acmeshop-cart:1.0.0
+      - image: gcr.io/vmwarecloudadvocacy/acmeshop-cart:latest
+        imagePullPolicy: "Always"
         name: cart
         env:
         - name: REDIS_HOST
           value: 'cart-redis'
-        - name: REDIS_PASS
+        - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: redis-pass
+              name: cart-redis-pass
               key: password
         - name: REDIS_PORT
           value: '6379'
         - name: CART_PORT
           value: '5000'
+        - name: USER_HOST
+          value: 'users'
+        - name: USER_PORT
+          value: '8083'
+        - name: JAEGER_AGENT_HOST
+          value: 'localhost'
+        - name: JAEGER_AGENT_PORT
+          value: '6831'
+        - name: AUTH_MODE
+          value: '1'
         ports:
         - containerPort: 5000
-          name: http-cart
+          name: cart
         volumeMounts:
         - mountPath: "/data"
           name: "acmefit-cart-data"
